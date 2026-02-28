@@ -22,7 +22,7 @@ chmod +x auth.sh cleanup.sh config.sh setup.sh start.sh stop.sh
 
 Run the setup script. This will build the image and initiate the Chrome Remote Desktop auth flow.
 
-    **NOTE: If a container has been created before, this will wipe any persisted data.**
+   **NOTE: If a container has been created before, this will wipe any persisted data.**
 
 ```bash
 ./setup.sh
