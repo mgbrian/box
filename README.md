@@ -22,7 +22,7 @@ chmod +x auth.sh cleanup.sh config.sh setup.sh start.sh stop.sh
 
 Run the setup script. This will build the image and initiate the Chrome Remote Desktop auth flow.
 
-**NOTE: If a container has been created before, this will wipe any persisted data.**
+**NOTE: This will delete all persisted data from any previously created container.**
 
 ```bash
 ./setup.sh
@@ -32,4 +32,4 @@ Run the setup script. This will build the image and initiate the Chrome Remote D
 
 - **To stop:** `./stop.sh`
 - **To start:** `./start.sh` (The container will remember your credentials and automatically appear online in CRD).
-- **To "factory reset":** `./setup.sh` (This deletes any persisted data and builds a fresh machine).
+- **To factory reset:** `./setup.sh` (This deletes any persisted data and builds a fresh machine).
