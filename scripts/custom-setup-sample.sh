@@ -38,13 +38,16 @@ sudo -E apt-get install -y python3.14 python3.14-venv python3.14-dev
 echo 'alias python3="/usr/bin/python3.14"' >> ~/.bashrc
 echo 'alias python="/usr/bin/python3.14"' >> ~/.bashrc
 
-# 3.5 Install pip
+# 3.1 Install pip
 sudo -E apt-get install -y python3.14-distutils || true
 curl -sS https://bootstrap.pypa.io/get-pip.py | python3.14
 
 # Add an alias so 'pip' and 'pip3' use the 3.14 version
 echo 'alias pip="/usr/bin/python3.14 -m pip"' >> ~/.bashrc
 echo 'alias pip3="/usr/bin/python3.14 -m pip"' >> ~/.bashrc
+
+# 3.2 Install build-essential, for pip installs that need to compile C-extensions (e.g. pandas, numpy)
+sudo -E apt-get install -y build-essential
 
 # 4. Install Deno
 curl -fsSL https://deno.land/install.sh | sh
