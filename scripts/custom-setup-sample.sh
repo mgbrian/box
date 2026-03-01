@@ -15,7 +15,7 @@ export DEBIAN_FRONTEND=noninteractive
 # ************************  DO NOT EDIT ABOVE THIS LINE ************************
 
 
-# 1. Install Nano
+# 1. Update and install Nano
 sudo apt-get update
 sudo apt-get install -y nano
 
@@ -26,11 +26,17 @@ sudo apt-get update
 sudo apt-get install -y brave-browser
 
 # 3. Install Python 3.14
-sudo add-apt-repository ppa:deadsnakes/ppa -y
-sudo apt-get update
-sudo apt-get install -y python3.14 python3.14-venv python3.14-dev
-# Set as default
-sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.14 1
+# -E flag to preserve DEBIAN_FRONTEND=noninteractive when running as sudo, else
+# installer hangs on timezone prompt screen.
+sudo -E add-apt-repository ppa:deadsnakes/ppa -y
+sudo -E apt-get update
+sudo -E apt-get install -y python3.14 python3.14-venv python3.14-dev
+
+# DO NOT use update-alternatives on /usr/bin/python3 as this breaks CRD (which
+# depends on the version pre-installed with the OS, just make it the default
+# for the user's shell
+echo 'alias python3="/usr/bin/python3.14"' >> ~/.bashrc
+echo 'alias python="/usr/bin/python3.14"' >> ~/.bashrc
 
 # 4. Install Deno
 curl -fsSL https://deno.land/install.sh | sh

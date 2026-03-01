@@ -72,7 +72,8 @@ RUN mkdir -p /home/$USER/.config/xfce4/xfconf/xfce-perchannel-xml && \
 
 # 7. Custom Setup
 # Use wildcard trick so COPY doesn't fail if file is missing
-COPY scripts/custom-setup.sh* /home/$USER/
+# Also ensure current user owns the script.
+COPY --chown=$USER:$USER scripts/custom-setup.sh* /home/$USER/
 
 RUN if [ -f /home/$USER/custom-setup.sh ]; then \
         echo "--- Starting Custom Setup ---" && \
@@ -80,7 +81,7 @@ RUN if [ -f /home/$USER/custom-setup.sh ]; then \
         /home/$USER/custom-setup.sh && \
         # Sync bashrc to profile so paths persist in all shell types
         cat /home/$USER/.bashrc >> /home/$USER/.profile || true && \
-        # rm /home/$USER/custom-setup.sh && \
+        rm /home/$USER/custom-setup.sh && \
         echo "--- Custom Setup Complete ---"; \
     else \
         echo "No custom-setup.sh found, skipping."; \
