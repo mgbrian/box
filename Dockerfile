@@ -13,13 +13,17 @@ RUN apt-get update && apt-get install -y \
     && add-apt-repository universe \
     && apt-get update
 
-# 2. Install XFCE, D-Bus, and stability tools
+# 2. Install XFCE, D-Bus, audio and stability tools
 RUN apt-get update && apt-get install -y \
     xfce4 \
     xfce4-session \
     xfce4-goodies \
     xfce4-terminal \
     dbus-x11 \
+    pulseaudio \
+    pulseaudio-utils \
+    alsa-utils \
+    libasound2-plugins \
     desktop-base \
     xserver-xorg-video-dummy \
     xbase-clients \
@@ -43,17 +47,24 @@ RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.d
 
 # 5. Create user
 ENV USER=crduser
-RUN useradd -m -s /bin/bash -G sudo $USER && \
+RUN useradd -m -s /bin/bash -G sudo,audio $USER && \
     echo "$USER:crdpassword" | chpasswd && \
     echo "%sudo ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 USER $USER
 WORKDIR /home/$USER
 
-# 6. Session script: clears old sessions and starts DBUS
+# 6. Session script: clears old sessions, starts DBUS, and virtual audio
 RUN echo "#!/bin/bash" > /home/$USER/.chrome-remote-desktop-session && \
     echo "unset SESSION_MANAGER" >> /home/$USER/.chrome-remote-desktop-session && \
     echo "unset DBUS_SESSION_BUS_ADDRESS" >> /home/$USER/.chrome-remote-desktop-session && \
+    # Create the required runtime directory for PulseAudio
+    echo "export XDG_RUNTIME_DIR=/tmp/runtime-\$USER" >> /home/$USER/.chrome-remote-desktop-session && \
+    echo "mkdir -p \$XDG_RUNTIME_DIR && chmod 700 \$XDG_RUNTIME_DIR" >> /home/$USER/.chrome-remote-desktop-session && \
+    # Start PulseAudio in the background
+    echo "pulseaudio --start --exit-idle-time=-1" >> /home/$USER/.chrome-remote-desktop-session && \
+    echo "pacmd load-module module-null-sink sink_name=crd_output" >> /home/$USER/.chrome-remote-desktop-session && \
+    echo "pacmd set-default-sink crd_output" >> /home/$USER/.chrome-remote-desktop-session && \
     echo "exec dbus-launch --exit-with-session startxfce4" >> /home/$USER/.chrome-remote-desktop-session && \
     chmod +x /home/$USER/.chrome-remote-desktop-session
 
