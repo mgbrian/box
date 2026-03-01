@@ -10,8 +10,11 @@ IMAGE_NAME="ubuntu-crd"
 CONTAINER_NAME="remote-desktop"
 # The name of the machine as should appear in Chrome Remote Desktop
 CRD_HOSTNAME="the-box"
-# Path to the folder containing persisted data
+# Path to the folder containing persisted CRD config data
 HOST_CONFIG_DIR="$(pwd)/crd-config"
+# Path to the folder containing persisted home folder data
+# The Documents, Downloads and Desktop folders on the VM are synced to this folder
+HOST_HOME_MAP="$(pwd)/vm-home"
 
 # Essential for this to run on Apple Silicon
 PLATFORM="linux/amd64"
