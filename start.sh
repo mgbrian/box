@@ -37,3 +37,30 @@ else
       -v "$HOST_HOME_MAP/Downloads:/home/crduser/Downloads" \
       $IMAGE_NAME
 fi
+
+# Boot completion confirmation...
+
+echo -n "Waiting for Remote Desktop to boot..."
+
+# Poll every 2 seconds for up to 30 seconds
+TIMEOUT=30
+ELAPSED=0
+
+while [ $ELAPSED -lt $TIMEOUT ]; do
+    # Check if the Xvfb virtual display process is running inside the container
+    if docker exec $CONTAINER_NAME pgrep -x "Xvfb" > /dev/null 2>&1; then
+        echo " Ready!"
+        echo "--------------------------------------------------------"
+        echo "Machine '$CRD_HOSTNAME' is ONLINE."
+        echo "Connect here: https://remotedesktop.google.com/access"
+        echo "--------------------------------------------------------"
+        exit 0
+    fi
+    sleep 2
+    echo -n "."
+    ELAPSED=$((ELAPSED + 2))
+done
+
+echo " Timed out."
+echo "The container started, but the display server took too long."
+echo "Run 'docker logs $CONTAINER_NAME' to check for errors."
