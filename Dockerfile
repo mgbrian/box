@@ -72,5 +72,21 @@ RUN echo "#!/bin/bash" > /home/$USER/.chrome-remote-desktop-session && \
 RUN mkdir -p /home/$USER/.config/xfce4/xfconf/xfce-perchannel-xml && \
     echo '<?xml version="1.0" encoding="UTF-8"?><channel name="xfce4-screensaver" version="1.0"><property name="saver" type="bool" value="false"/><property name="lock" type="bool" value="false"/></channel>' > /home/$USER/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-screensaver.xml
 
+# 9. Custom Setup
+# Use wildcard trick so COPY doesn't fail if file is missing
+COPY scripts/custom-setup.sh* /home/$USER/
+
+RUN if [ -f /home/$USER/custom-setup.sh ]; then \
+        echo "--- Starting Custom Setup ---" && \
+        chmod +x /home/$USER/custom-setup.sh && \
+        /home/$USER/custom-setup.sh && \
+        # Sync bashrc to profile so paths persist in all shell types
+        cat /home/$USER/.bashrc >> /home/$USER/.profile || true && \
+        rm /home/$USER/custom-setup.sh && \
+        echo "--- Custom Setup Complete ---"; \
+    else \
+        echo "No custom-setup.sh found, skipping."; \
+    fi
+
 # 8. Entrypoint: Cleanup X11 locks and start CRD on boot
 CMD ["/bin/bash", "-c", "sudo rm -f /tmp/.X*-lock /tmp/.X11-unix/X* && if ls /home/$USER/.config/chrome-remote-desktop/host#*.json 1> /dev/null 2>&1; then /opt/google/chrome-remote-desktop/chrome-remote-desktop --start; fi; tail -f /dev/null"]

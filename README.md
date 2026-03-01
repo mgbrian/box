@@ -10,13 +10,25 @@ A lightweight Linux VM using Docker and Chrome Remote Desktop -- essentially a f
 
 ## Initial Setup
 
-### 1. Set Script Permissions
+### 1. Prepare Scripts
+
+#### Set Permissions
 
 Run this once to make all scripts executable:
 
 ```bash
 chmod +x auth.sh cleanup.sh config.sh setup.sh start.sh stop.sh
 ```
+
+#### [Optional] Add Custom Additional/Setup Instructions
+
+You may add any custom setup instructions e.g. software installs, etc. to `scripts/custom-setup.sh`.
+
+```bash
+cp scripts/custom-setup-sample.sh scripts/custom-setup.sh
+```
+
+Edit as needed before moving to step 2.
 
 ### 2. Set Up Machine
 

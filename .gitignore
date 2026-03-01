@@ -1,4 +1,6 @@
+.DS_Store
+
 notes/
 crd-config/
 vm-home/
-.DS_Store
+scripts/custom-setup.sh
