@@ -69,19 +69,19 @@ RUN mkdir -p /home/$USER/.config/xfce4/xfconf/xfce-perchannel-xml && \
     echo '<?xml version="1.0" encoding="UTF-8"?><channel name="xfce4-screensaver" version="1.0"><property name="saver" type="bool" value="false"/><property name="lock" type="bool" value="false"/></channel>' > /home/$USER/.config/xfce4/xfconf/xfce4-screensaver.xml
 
 # 7. Custom Setup
-# Use wildcard trick so COPY doesn't fail if file is missing
-# Also ensure current user owns the script.
-COPY --chown=$USER:$USER scripts/custom-setup.sh* /home/$USER/
+# Copy the scripts directory and only run custom-setup.sh if it exists.
+COPY --chown=$USER:$USER scripts/ /tmp/box-scripts/
 
-RUN if [ -f /home/$USER/custom-setup.sh ]; then \
+RUN if [ -f /tmp/box-scripts/custom-setup.sh ]; then \
         echo "--- Starting Custom Setup ---" && \
-        chmod +x /home/$USER/custom-setup.sh && \
-        /home/$USER/custom-setup.sh && \
+        chmod +x /tmp/box-scripts/custom-setup.sh && \
+        /tmp/box-scripts/custom-setup.sh && \
         # Sync bashrc to profile so paths persist in all shell types
         cat /home/$USER/.bashrc >> /home/$USER/.profile || true && \
-        rm /home/$USER/custom-setup.sh && \
+        rm -rf /tmp/box-scripts && \
         echo "--- Custom Setup Complete ---"; \
     else \
+        rm -rf /tmp/box-scripts && \
         echo "No custom-setup.sh found, skipping."; \
     fi
 
