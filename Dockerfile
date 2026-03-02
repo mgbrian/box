@@ -58,6 +58,9 @@ WORKDIR /home/$USER
 RUN echo "#!/bin/bash" > /home/$USER/.chrome-remote-desktop-session && \
     echo "unset SESSION_MANAGER" >> /home/$USER/.chrome-remote-desktop-session && \
     echo "unset DBUS_SESSION_BUS_ADDRESS" >> /home/$USER/.chrome-remote-desktop-session && \
+    # Clean up stale PulseAudio locks and temp dirs from previous runs
+    echo "pulseaudio -k 2>/dev/null || true" >> /home/$USER/.chrome-remote-desktop-session && \
+    echo "rm -rf /home/\$USER/.config/pulse /tmp/pulse-* /tmp/runtime-\$USER /tmp/pyxdg-runtime-dir-fallback-\$USER" >> /home/$USER/.chrome-remote-desktop-session && \
     # Create the required runtime directory for PulseAudio
     echo "export XDG_RUNTIME_DIR=/tmp/runtime-\$USER" >> /home/$USER/.chrome-remote-desktop-session && \
     echo "mkdir -p \$XDG_RUNTIME_DIR && chmod 700 \$XDG_RUNTIME_DIR" >> /home/$USER/.chrome-remote-desktop-session && \
