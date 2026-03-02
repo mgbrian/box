@@ -2,7 +2,7 @@
 
 """
 Ensure chrome-remote-desktop always has an XDG runtime dir so PipeWire sockets
-use an absolute path at runtime, not a username baked in at image build time.
+use an absolute path, so audio works on Ubuntu 24.04.
 """
 
 from pathlib import Path
