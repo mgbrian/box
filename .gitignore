@@ -4,3 +4,4 @@ notes/
 crd-config/
 vm-home/
 scripts/custom-setup.sh
+.env

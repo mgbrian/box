@@ -10,6 +10,16 @@ IMAGE_NAME="ubuntu-crd"
 CONTAINER_NAME="remote-desktop"
 # The name of the machine as should appear in Chrome Remote Desktop
 CRD_HOSTNAME="the-box"
+# Load optional local overrides before applying defaults.
+if [ -f ./.env ]; then
+    set -a
+    source ./.env
+    set +a
+fi
+# Remote desktop user inside the container
+CRD_USER="${CRD_USER:-crduser}"
+# Remote desktop user's password inside the container
+CRD_PASSWORD="${CRD_PASSWORD:-crdpassword}"
 # Path to the folder containing persisted CRD config data
 HOST_CONFIG_DIR="$(pwd)/crd-config"
 # Path to the folder containing persisted home folder data

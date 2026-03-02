@@ -20,6 +20,14 @@ Run this once to make all scripts executable:
 chmod +x auth.sh cleanup.sh config.sh setup.sh start.sh stop.sh
 ```
 
+#### [Optional] Override Default Credentials
+
+You can create a `.env` file in the project root to override `CRD_USER`, and `CRD_PASSWORD`. If omitted, the defaults in `config.sh` are used.
+
+```bash
+cp sample_env .env
+```
+
 #### [Optional] Add Custom Additional/Setup Instructions
 
 You may add any custom setup instructions e.g. software installs, etc. to `scripts/custom-setup.sh`.

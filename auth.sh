@@ -13,7 +13,7 @@ echo "3. Copy the 'Debian Linux' command and paste it here:"
 read -p "> " AUTH_COMMAND
 
 if [[ $AUTH_COMMAND == *"start-host"* ]]; then
-    docker exec -u crduser -it $CONTAINER_NAME bash -c "$AUTH_COMMAND"
+    docker exec -u "$CRD_USER" -it $CONTAINER_NAME bash -c "$AUTH_COMMAND"
     echo "Auth successful! Restarting to finalize..."
     ./start.sh
 else

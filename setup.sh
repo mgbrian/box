@@ -8,7 +8,11 @@ source ./config.sh
 
 echo "--- Building Image ($PLATFORM) ---"
 
-docker build --platform $PLATFORM -t $IMAGE_NAME .
+docker build \
+    --platform $PLATFORM \
+    --build-arg CRD_USER="$CRD_USER" \
+    --build-arg CRD_PASSWORD="$CRD_PASSWORD" \
+    -t $IMAGE_NAME .
 
 # Run CRD auth flow if no existing config, else just start the container.
 if ls "$HOST_CONFIG_DIR"/host#*.json 1> /dev/null 2>&1; then

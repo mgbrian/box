@@ -41,12 +41,14 @@ RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.d
     rm *.deb
 
 # 4. Create user
-ENV USER=crduser
+ARG CRD_USER=crduser
+ARG CRD_PASSWORD=crdpassword
+ENV USER=$CRD_USER
 RUN useradd -m -s /bin/bash -G sudo,audio $USER && \
     # Ensure CRD group exists and add the user to it..
     groupadd -f chrome-remote-desktop && \
     usermod -aG chrome-remote-desktop $USER && \
-    echo "$USER:crdpassword" | chpasswd && \
+    echo "$USER:$CRD_PASSWORD" | chpasswd && \
     echo "%sudo ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 USER $USER

@@ -29,12 +29,12 @@ else
       --hostname $CRD_HOSTNAME \
       --shm-size=2g \
       --security-opt seccomp=unconfined \
-      -v "$HOST_CONFIG_DIR:/home/crduser/.config/chrome-remote-desktop" \
+      -v "$HOST_CONFIG_DIR:/home/$CRD_USER/.config/chrome-remote-desktop" \
       -v "$HOST_MACHINE_ID:/var/lib/dbus/machine-id:ro" \
       -v "$HOST_MACHINE_ID:/etc/machine-id:ro" \
-      -v "$HOST_HOME_MAP/Desktop:/home/crduser/Desktop" \
-      -v "$HOST_HOME_MAP/Documents:/home/crduser/Documents" \
-      -v "$HOST_HOME_MAP/Downloads:/home/crduser/Downloads" \
+      -v "$HOST_HOME_MAP/Desktop:/home/$CRD_USER/Desktop" \
+      -v "$HOST_HOME_MAP/Documents:/home/$CRD_USER/Documents" \
+      -v "$HOST_HOME_MAP/Downloads:/home/$CRD_USER/Downloads" \
       $IMAGE_NAME
 fi
 
