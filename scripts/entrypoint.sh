@@ -1,7 +1,13 @@
 #!/bin/bash
 set -e
 
+# Expand a literal "$USER" if present (Docker ENV won't expand).
+# If the env var isn’t set, default to /tmp/runtime-$USER (as provided via Docker ENV)
 XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/tmp/runtime-$USER}
+# If the value still contains the literal text $USER
+# (might happen when passing /tmp/runtime-$USER through Docker env without shell expansion),
+# replace that literal with the actual username at runtime
+XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR//\$USER/$USER}
 
 sudo mkdir -p "$XDG_RUNTIME_DIR"
 sudo chown -R "$USER:$USER" "$XDG_RUNTIME_DIR" "/home/$USER/.config/chrome-remote-desktop"

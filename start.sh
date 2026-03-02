@@ -29,6 +29,7 @@ else
       --hostname $CRD_HOSTNAME \
       --shm-size=2g \
       --security-opt seccomp=unconfined \
+      -e XDG_RUNTIME_DIR="/tmp/runtime-$CRD_USER" \
       -v "$HOST_CONFIG_DIR:/home/$CRD_USER/.config/chrome-remote-desktop" \
       -v "$HOST_MACHINE_ID:/var/lib/dbus/machine-id:ro" \
       -v "$HOST_MACHINE_ID:/etc/machine-id:ro" \

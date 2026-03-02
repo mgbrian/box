@@ -14,7 +14,8 @@ read -p "> " AUTH_COMMAND
 
 if [[ $AUTH_COMMAND == *"start-host"* ]]; then
     docker exec -u "$CRD_USER" -it $CONTAINER_NAME bash -c "$AUTH_COMMAND"
-    echo "Auth successful! Restarting to finalize..."
+    echo "Auth successful! Restarting container to apply audio/runtime config..."
+    docker stop $CONTAINER_NAME > /dev/null 2>&1 || true
     ./start.sh
 else
     echo "Error: Invalid command entered."
