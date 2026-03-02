@@ -59,3 +59,8 @@ echo 'export PATH="$DENO_INSTALL/bin:$PATH"' >> ~/.bashrc
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 # Rustup usually adds itself to .profile, but add explicitly to .bashrc
 echo 'source "$HOME/.cargo/env"' >> ~/.bashrc
+
+# 6. Install Atom 1.60
+wget https://github.com/atom/atom/releases/download/v1.60.0/atom-amd64.deb
+sudo apt-get install -y ./atom-amd64.deb
+rm atom-amd64.deb
