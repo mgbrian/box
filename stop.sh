@@ -44,7 +44,7 @@ echo ""
 # Handle the result
 if [ "$SHUTDOWN_SUCCESS" = true ]; then
     # Clear session runtime artifacts so the next docker start gets a clean CRD launch.
-    docker exec $CONTAINER_NAME bash -lc "rm -rf /tmp/runtime-$CRD_USER/* /tmp/pyxdg-runtime-dir-fallback-$CRD_USER && rm -f /tmp/.X20-lock /tmp/.X11-unix/X20" > /dev/null 2>&1 || true
+    docker exec $CONTAINER_NAME bash -lc "rm -rf /tmp/runtime-$CRD_USER/* /tmp/runtime-root/* /tmp/pyxdg-runtime-dir-fallback-$CRD_USER && rmdir /tmp/runtime-root 2>/dev/null || true; rm -f /tmp/.X20-lock /tmp/.X11-unix/X20" > /dev/null 2>&1 || true
 
     echo "Services stopped gracefully."
     docker stop $CONTAINER_NAME > /dev/null

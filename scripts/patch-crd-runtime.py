@@ -2,11 +2,9 @@
 
 """
 Ensure chrome-remote-desktop always has an XDG runtime dir so PipeWire sockets
-use an absolute path, so audio works on Ubuntu 24.04.
+use an absolute path at runtime, not a username baked in at image build time.
 """
 
-import getpass
-import os
 from pathlib import Path
 
 
@@ -17,7 +15,7 @@ marker = "def _init_child_env(self):\n"
 inject = (
     "    # Ensure a runtime dir exists so PipeWire sockets land in an absolute path\n"
     "    if not os.environ.get(\"XDG_RUNTIME_DIR\"):\n"
-    f"        os.environ[\"XDG_RUNTIME_DIR\"] = f\"/tmp/runtime-{getpass.getuser()}\"\n"
+    "        os.environ[\"XDG_RUNTIME_DIR\"] = f\"/tmp/runtime-{os.environ.get('USER') or getpass.getuser()}\"\n"
 )
 
 if marker not in text:
