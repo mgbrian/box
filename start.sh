@@ -47,8 +47,10 @@ TIMEOUT=30
 ELAPSED=0
 
 while [ $ELAPSED -lt $TIMEOUT ]; do
-    # Check if the Xvfb virtual display process is running inside the container
-    if docker exec $CONTAINER_NAME pgrep -x "Xvfb" > /dev/null 2>&1; then
+    # Check for the CRD host process using -f (full command line match)
+    # Also check if the X11 socket for display :20 exists
+    if docker exec $CONTAINER_NAME pgrep -f "chrome-remote-desktop-host" > /dev/null 2>&1 || \
+       docker exec $CONTAINER_NAME test -S /tmp/.X11-unix/X20; then
         echo " Ready!"
         echo "--------------------------------------------------------"
         echo "Machine '$CRD_HOSTNAME' is ONLINE."

@@ -8,14 +8,16 @@ if ! docker ps -q -f name=^/${CONTAINER_NAME}$ > /dev/null; then
     exit 0
 fi
 
-echo "Initiating graceful shutdown of Remote Desktop services..."
+echo "Initiating graceful shutdown..."
 
-# Stop CRD and PulseAudio cleanly
-docker exec $CONTAINER_NAME su - "$CRD_USER" -c "/opt/google/chrome-remote-desktop/chrome-remote-desktop --stop" > /dev/null 2>&1
-docker exec $CONTAINER_NAME su - "$CRD_USER" -c "pulseaudio -k" > /dev/null 2>&1 || true
+# Stop CRD
+docker exec $CONTAINER_NAME su - $CRD_USER -c "/opt/google/chrome-remote-desktop/chrome-remote-desktop --stop" > /dev/null 2>&1
 
-# ell the XFCE desktop environment to terminate
-docker exec $CONTAINER_NAME pkill -15 -f xfce > /dev/null 2>&1 || true
+# Kill Audio (both PulseAudio and PipeWire wrappers in 24.04)
+docker exec $CONTAINER_NAME su - $CRD_USER -c "pkill -u $CRD_USER pulseaudio || pkill -u $CRD_USER pipewire" > /dev/null 2>&1 || true
+
+# Terminate XFCE and the X Server
+docker exec $CONTAINER_NAME pkill -15 -u $CRD_USER > /dev/null 2>&1 || true
 
 # Polling loop for timeout
 TIMEOUT=15
@@ -25,8 +27,8 @@ SHUTDOWN_SUCCESS=false
 echo -n "Waiting for services to spin down..."
 
 while [ $ELAPSED -lt $TIMEOUT ]; do
-    # Check if the main CRD host process is still alive
-    if ! docker exec $CONTAINER_NAME pgrep -f "chrome-remote-desktop-host" > /dev/null 2>&1; then
+    # Check if the main CRD host process OR the Xvfb server is still alive
+    if ! docker exec $CONTAINER_NAME pgrep -f "chrome-remote-desktop-host|Xvfb" > /dev/null 2>&1; then
         SHUTDOWN_SUCCESS=true
         break
     fi
@@ -39,19 +41,19 @@ echo ""
 
 # Handle the result
 if [ "$SHUTDOWN_SUCCESS" = true ]; then
-    echo "Services stopped gracefully. Shutting down container..."
+    # EXTRA STEP FOR 24.04: Force clear the X11 lock file if it still exists
+    # This prevents the "Display :20 already in use" error on restart
+    docker exec $CONTAINER_NAME rm -f /tmp/.X20-lock > /dev/null 2>&1
+
+    echo "Services stopped gracefully."
     docker stop $CONTAINER_NAME > /dev/null
     echo "Machine stopped cleanly."
 else
     echo "[!] Graceful shutdown timed out after $TIMEOUT seconds."
-    read -p "Would you like to force stop the container? (y/N): " FORCE
+    read -p "Force stop? (y/N): " FORCE
 
     if [[ "$FORCE" =~ ^[Yy]$ ]]; then
-        echo "Force stopping container..."
-        # Using -t 0 tells Docker to skip the SIGTERM wait and just kill it instantly
         docker stop -t 0 $CONTAINER_NAME > /dev/null
-        echo "Machine force stopped."
-    else
-        echo "Shutdown aborted. Container is still running."
+        echo "Force stopped."
     fi
 fi
