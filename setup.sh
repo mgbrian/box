@@ -3,8 +3,35 @@
 set -e
 source ./config.sh
 
-# Delete the old image, container and persisted data.
-./cleanup.sh
+RESET_IDENTITY=false
+DELETE_DATA=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --reset-identity)
+            RESET_IDENTITY=true
+            ;;
+        --delete-data)
+            DELETE_DATA=true
+            ;;
+        --new)
+            RESET_IDENTITY=true
+            DELETE_DATA=true
+            ;;
+        *)
+            echo "Error: Unknown flag '$arg'."
+            echo "Usage: ./setup.sh [--reset-identity] [--delete-data] [--new]"
+            exit 1
+            ;;
+    esac
+done
+
+CLEANUP_ARGS=()
+[ "$RESET_IDENTITY" = true ] && CLEANUP_ARGS+=("--reset-identity")
+[ "$DELETE_DATA" = true ] && CLEANUP_ARGS+=("--delete-data")
+
+# Delete the old image/container and optionally reset identity/data.
+./cleanup.sh "${CLEANUP_ARGS[@]}"
 
 echo "--- Building Image ($PLATFORM) ---"
 

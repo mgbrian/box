@@ -3,33 +3,64 @@
 # -------------------------------------------
 # Cleanup script.
 #
-# Deletes image, container and (optionally) machine identity.
-#
-#  ** For now, synced home subfolders (Desktop, etc.) are not deleted.
-#     You can do this manually.
+# Deletes image, container and optionally persisted identity/data.
 #
 #   ./cleanup.sh
 #       Removes image and container; preserves machine identity and persisted data
 #
-#   ./cleanup.sh --all :
-#       Removes image and container, and machine identity. This severs the connection with CRD.
+#   ./cleanup.sh --reset-identity
+#       Removes image/container and resets machine identity/CRD config
+#
+#   ./cleanup.sh --delete-data
+#       Removes image/container and deletes synced home data
+#
+#   ./cleanup.sh --all
+#       Removes image/container, resets identity, and deletes synced home data
 # -------------------------------------------
 
 source ./config.sh
+
+RESET_IDENTITY=false
+DELETE_DATA=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --reset-identity)
+            RESET_IDENTITY=true
+            ;;
+        --delete-data)
+            DELETE_DATA=true
+            ;;
+        --all)
+            RESET_IDENTITY=true
+            DELETE_DATA=true
+            ;;
+        *)
+            echo "Error: Unknown flag '$arg'."
+            echo "Usage: ./cleanup.sh [--reset-identity] [--delete-data] [--all]"
+            exit 1
+            ;;
+    esac
+done
 
 echo "--- Cleaning up ---"
 
 docker rm -f $CONTAINER_NAME 2>/dev/null || true
 docker rmi -f $IMAGE_NAME 2>/dev/null || true
 
-# Only wipe the identity if the --all flag is passed
-if [[ "$1" == "--all" ]]; then
+if [ "$RESET_IDENTITY" = true ]; then
     echo "--- Wiping Machine Identity and CRD Config ---"
     rm -rf "$HOST_CONFIG_DIR"
-    # TODO: Decide whether this should fall under another flag.
-    # rm -rf "$HOST_HOME_MAP"
-else
-    echo "Machine Identity/CRD connection preserved. Run './cleanup.sh --all' for a total reset."
+fi
+
+if [ "$DELETE_DATA" = true ]; then
+    echo "--- Deleting Persisted Home Data ---"
+    rm -rf "$HOST_HOME_MAP"
+fi
+
+if [ "$RESET_IDENTITY" = false ] && [ "$DELETE_DATA" = false ]; then
+    echo "Machine identity/CRD config preserved."
+    echo "Persisted home data preserved."
 fi
 
 echo "Cleanup complete."

@@ -50,6 +50,38 @@ Run the setup script. This will build the image and initiate the Chrome Remote D
 
 ## Daily Usage
 
-- **To stop:** `./stop.sh`
-- **To start:** `./start.sh` (The container will remember your credentials and automatically appear online in CRD).
-- **To factory reset:** `./setup.sh` (This deletes any persisted data and builds a fresh machine).
+Stop the machine:
+
+```bash
+./stop.sh
+```
+
+Start the machine (it will remember your credentials and appear online in CRD):
+
+```bash
+./start.sh
+```
+
+Rebuild the image while preserving machine identity and persisted home data:
+
+```bash
+./setup.sh
+```
+
+Rebuild and reset the machine identity only:
+
+```bash
+./setup.sh --reset-identity
+```
+
+Rebuild and delete persisted home data only:
+
+```bash
+./setup.sh --delete-data
+```
+
+Create a fully fresh machine (reset identity and delete persisted home data):
+
+```bash
+./setup.sh --new
+```
