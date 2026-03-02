@@ -42,7 +42,7 @@ Edit as needed before moving to step 2.
 
 Run the setup script. This will build the image and initiate the Chrome Remote Desktop auth flow.
 
-**NOTE: This will delete all persisted data from any previously created container.**
+**NOTE: If a previous container existed, this will preserve the CRD identity and persisted home folder data. See section below for how to perform a hard(er) reset.**
 
 ```bash
 ./setup.sh
@@ -62,7 +62,7 @@ Start the machine (it will remember your credentials and appear online in CRD):
 ./start.sh
 ```
 
-Rebuild the image while preserving machine identity and persisted home data:
+Rebuild the image while preserving machine identity (existing link to CRD) and persisted home data:
 
 ```bash
 ./setup.sh
@@ -80,7 +80,7 @@ Rebuild and delete persisted home data only:
 ./setup.sh --delete-data
 ```
 
-Create a fully fresh machine (reset identity and delete persisted home data):
+Create a fully fresh machine (reset identity/sever existing link to CRD and delete persisted home data):
 
 ```bash
 ./setup.sh --new
