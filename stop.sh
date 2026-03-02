@@ -3,7 +3,7 @@
 source ./config.sh
 
 # Check if the container is actually running
-if ! docker ps -q -f name=^/${CONTAINER_NAME}$ > /dev/null; then
+if [ -z "$(docker ps -q -f name=^/${CONTAINER_NAME}$)" ]; then
     echo "Container '$CONTAINER_NAME' is already stopped."
     exit 0
 fi
@@ -11,12 +11,14 @@ fi
 echo "Initiating graceful shutdown..."
 
 # Stop CRD
-docker exec $CONTAINER_NAME su - $CRD_USER -c "/opt/google/chrome-remote-desktop/chrome-remote-desktop --stop" > /dev/null 2>&1
+docker exec -u "$CRD_USER" $CONTAINER_NAME /opt/google/chrome-remote-desktop/chrome-remote-desktop --stop > /dev/null 2>&1 || true
 
-# Kill Audio (both PulseAudio and PipeWire wrappers in 24.04)
-docker exec $CONTAINER_NAME su - $CRD_USER -c "pkill -u $CRD_USER pulseaudio || pkill -u $CRD_USER pipewire" > /dev/null 2>&1 || true
+# Kill audio daemons so restart starts from a clean runtime state.
+docker exec $CONTAINER_NAME pkill -u "$CRD_USER" -x pulseaudio > /dev/null 2>&1 || true
+docker exec $CONTAINER_NAME pkill -u "$CRD_USER" -x pipewire > /dev/null 2>&1 || true
+docker exec $CONTAINER_NAME pkill -u "$CRD_USER" -x wireplumber > /dev/null 2>&1 || true
 
-# Terminate XFCE and the X Server
+# Terminate XFCE, the X server, and any leftover helper shells.
 docker exec $CONTAINER_NAME pkill -15 -u $CRD_USER > /dev/null 2>&1 || true
 
 # Polling loop for timeout
@@ -27,8 +29,8 @@ SHUTDOWN_SUCCESS=false
 echo -n "Waiting for services to spin down..."
 
 while [ $ELAPSED -lt $TIMEOUT ]; do
-    # Check if the main CRD host process OR the Xvfb server is still alive
-    if ! docker exec $CONTAINER_NAME pgrep -f "chrome-remote-desktop-host|Xvfb" > /dev/null 2>&1; then
+    # Wait until the CRD host, display server, and audio daemons are all gone.
+    if ! docker exec $CONTAINER_NAME pgrep -u "$CRD_USER" -f "chrome-remote-desktop-host|Xorg|Xvfb|pipewire|wireplumber|pulseaudio" > /dev/null 2>&1; then
         SHUTDOWN_SUCCESS=true
         break
     fi
@@ -41,9 +43,8 @@ echo ""
 
 # Handle the result
 if [ "$SHUTDOWN_SUCCESS" = true ]; then
-    # EXTRA STEP FOR 24.04: Force clear the X11 lock file if it still exists
-    # This prevents the "Display :20 already in use" error on restart
-    docker exec $CONTAINER_NAME rm -f /tmp/.X20-lock > /dev/null 2>&1
+    # Clear session runtime artifacts so the next docker start gets a clean CRD launch.
+    docker exec $CONTAINER_NAME bash -lc "rm -rf /tmp/runtime-$CRD_USER/* /tmp/pyxdg-runtime-dir-fallback-$CRD_USER && rm -f /tmp/.X20-lock /tmp/.X11-unix/X20" > /dev/null 2>&1 || true
 
     echo "Services stopped gracefully."
     docker stop $CONTAINER_NAME > /dev/null

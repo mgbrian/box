@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y \
     python3-xdg \
     xfonts-base \
     x11-xserver-utils \
+    libutempter0 \
     && rm -rf /var/lib/apt/lists/*
 
 # 3. Install Google Chrome & Remote Desktop.
@@ -40,10 +41,32 @@ RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.d
     apt-get install -y ./chrome-remote-desktop_current_amd64.deb && \
     rm *.deb
 
+# Patch CRD launcher so XDG_RUNTIME_DIR is always set (needed for PipeWire on 24.04)
+RUN python3 - <<'PY'
+import getpass, os
+from pathlib import Path
+
+p = Path('/opt/google/chrome-remote-desktop/chrome-remote-desktop')
+text = p.read_text()
+marker = "def _init_child_env(self):\n"
+inject = (
+    "    # Ensure a runtime dir exists so PipeWire sockets land in an absolute path\n"
+    "    if not os.environ.get(\"XDG_RUNTIME_DIR\"):\n"
+    "        os.environ[\"XDG_RUNTIME_DIR\"] = f\"/tmp/runtime-{getpass.getuser()}\"\n"
+)
+
+if inject not in text:
+    if marker not in text:
+        raise SystemExit("_init_child_env not found in chrome-remote-desktop")
+    text = text.replace(marker, marker + inject)
+    p.write_text(text)
+PY
+
 # 4. Create user
 ARG CRD_USER=crduser
 ARG CRD_PASSWORD=crdpassword
 ENV USER=$CRD_USER
+ENV XDG_RUNTIME_DIR=/tmp/runtime-$USER
 RUN useradd -m -s /bin/bash -G sudo,audio $USER && \
     # Ensure CRD group exists and add the user to it..
     groupadd -f chrome-remote-desktop && \
@@ -54,20 +77,12 @@ RUN useradd -m -s /bin/bash -G sudo,audio $USER && \
 USER $USER
 WORKDIR /home/$USER
 
-# 5. Session script: clears old sessions, starts DBUS, and virtual audio
+# 5. Session script: clears old session vars and starts the desktop session
 RUN echo "#!/bin/bash" > /home/$USER/.chrome-remote-desktop-session && \
     echo "unset SESSION_MANAGER" >> /home/$USER/.chrome-remote-desktop-session && \
     echo "unset DBUS_SESSION_BUS_ADDRESS" >> /home/$USER/.chrome-remote-desktop-session && \
-    # Clean up stale PulseAudio locks and temp dirs from previous runs
-    echo "pulseaudio -k 2>/dev/null || true" >> /home/$USER/.chrome-remote-desktop-session && \
-    echo "rm -rf /home/\$USER/.config/pulse /tmp/pulse-* /tmp/runtime-\$USER /tmp/pyxdg-runtime-dir-fallback-\$USER" >> /home/$USER/.chrome-remote-desktop-session && \
-    # Create the required runtime directory for PulseAudio
     echo "export XDG_RUNTIME_DIR=/tmp/runtime-\$USER" >> /home/$USER/.chrome-remote-desktop-session && \
     echo "mkdir -p \$XDG_RUNTIME_DIR && chmod 700 \$XDG_RUNTIME_DIR" >> /home/$USER/.chrome-remote-desktop-session && \
-    # Start PulseAudio in the background
-    echo "pulseaudio --start --exit-idle-time=-1" >> /home/$USER/.chrome-remote-desktop-session && \
-    echo "pacmd load-module module-null-sink sink_name=crd_output" >> /home/$USER/.chrome-remote-desktop-session && \
-    echo "pacmd set-default-sink crd_output" >> /home/$USER/.chrome-remote-desktop-session && \
     echo "exec dbus-launch --exit-with-session startxfce4" >> /home/$USER/.chrome-remote-desktop-session && \
     chmod +x /home/$USER/.chrome-remote-desktop-session
 
@@ -92,5 +107,5 @@ RUN if [ -f /home/$USER/custom-setup.sh ]; then \
         echo "No custom-setup.sh found, skipping."; \
     fi
 
-# 8. Entrypoint: Cleanup X11 locks and start CRD on boot
-CMD ["/bin/bash", "-c", "sudo chown -R $USER:$USER /home/$USER/.config/chrome-remote-desktop && sudo rm -f /tmp/.X*-lock /tmp/.X11-unix/X* && if ls /home/$USER/.config/chrome-remote-desktop/host#*.json 1> /dev/null 2>&1; then /opt/google/chrome-remote-desktop/chrome-remote-desktop --start; fi; tail -f /dev/null"]
+# 8. Entrypoint: Cleanup session runtime state and start CRD on boot
+CMD ["/bin/bash", "-c", "sudo mkdir -p \"$XDG_RUNTIME_DIR\" && sudo chown -R $USER:$USER \"$XDG_RUNTIME_DIR\" /home/$USER/.config/chrome-remote-desktop && sudo chmod 700 \"$XDG_RUNTIME_DIR\" && sudo find \"$XDG_RUNTIME_DIR\" -mindepth 1 -delete && sudo rm -rf /tmp/pyxdg-runtime-dir-fallback-$USER && sudo rm -f /tmp/.X*-lock /tmp/.X11-unix/X* && if ls /home/$USER/.config/chrome-remote-desktop/host#*.json 1> /dev/null 2>&1; then XDG_RUNTIME_DIR=\"$XDG_RUNTIME_DIR\" /opt/google/chrome-remote-desktop/chrome-remote-desktop --start; fi; tail -f /dev/null"]
