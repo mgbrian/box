@@ -33,8 +33,8 @@ if [ -f ./.env ]; then
     set +a
 fi
 
-# Persist (synthetic) machine ID to (optionally) keep connection to CRD between
-# container rebuilds
-HOST_MACHINE_ID="$HOST_CONFIG_DIR/machine-id"
+# File containing persisted (synthetic) machine ID to keep connection to CRD
+# between container rebuilds.
+PERSISTED_MACHINE_ID_FILE="$HOST_CONFIG_DIR/machine-id"
 # Essential for this to run on Apple Silicon
 PLATFORM="linux/amd64"

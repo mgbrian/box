@@ -5,9 +5,9 @@ source ./config.sh
 mkdir -p "$HOST_CONFIG_DIR"
 
 # Generate  Machine ID once if it doesn't exist
-if [ ! -f "$HOST_MACHINE_ID" ]; then
+if [ ! -f "$PERSISTED_MACHINE_ID_FILE" ]; then
     echo "Generating new Machine ID..."
-    dbus-uuidgen > "$HOST_MACHINE_ID"
+    dbus-uuidgen > "$PERSISTED_MACHINE_ID_FILE"
 fi
 
 if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
@@ -31,8 +31,8 @@ else
       --security-opt seccomp=unconfined \
       -e XDG_RUNTIME_DIR="/tmp/runtime-$CRD_USER" \
       -v "$HOST_CONFIG_DIR:/home/$CRD_USER/.config/chrome-remote-desktop" \
-      -v "$HOST_MACHINE_ID:/var/lib/dbus/machine-id:ro" \
-      -v "$HOST_MACHINE_ID:/etc/machine-id:ro" \
+      -v "$PERSISTED_MACHINE_ID_FILE:/var/lib/dbus/machine-id:ro" \
+      -v "$PERSISTED_MACHINE_ID_FILE:/etc/machine-id:ro" \
       -v "$HOST_HOME_MAP/Desktop:/home/$CRD_USER/Desktop" \
       -v "$HOST_HOME_MAP/Documents:/home/$CRD_USER/Documents" \
       -v "$HOST_HOME_MAP/Downloads:/home/$CRD_USER/Downloads" \
