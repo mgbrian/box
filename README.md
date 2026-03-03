@@ -28,15 +28,15 @@ You can create a `.env` file in the project root to override `CRD_USER`, and `CR
 cp sample_env .env
 ```
 
-#### [Optional] Add Custom Additional/Setup Instructions
+#### [Optional] Add Custom Setup Instructions
 
 You may add any custom setup instructions e.g. software installs, etc. to `scripts/custom-setup.sh`.
+
+Duplicate and edit the sample script before moving to step 2:
 
 ```bash
 cp scripts/custom-setup-sample.sh scripts/custom-setup.sh
 ```
-
-Edit as needed before moving to step 2.
 
 ### 2. Set Up Machine
 
