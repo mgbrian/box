@@ -1,6 +1,6 @@
 # Box
 
-A lightweight Linux VM using Docker and Chrome Remote Desktop -- essentially a full-featured machine with a graphical interface and persistent storage.
+Full-featured Linux VM with a graphical interface and persistent storage, using Docker and Chrome Remote Desktop.
 
 ## Requirements
 
