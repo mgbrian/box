@@ -10,9 +10,28 @@ Full-featured Linux VM with a graphical interface and persistent storage, using 
 
 ## Initial Setup
 
-### 1. Prepare Scripts
+### Easy Setup
 
-#### Set Permissions
+If you don't need to customise the setup process, run this, follow the instructions in the terminal, and you're done!
+
+```bash
+chmod +x *.sh && ./setup.sh
+```
+
+**Good to know:**
+
+    - The default VM username and password are `crduser` and `crdpassword`.
+    - If you've previously set up a machine (from the same folder), this will preserve VM data (in the Desktop, Downloads and Documents folders), and not require re-authentication with Chrome Remote Desktop.
+
+Skip to [Daily Usage](#daily-usage).
+
+### Detailed Setup
+
+For more control of the setup process:
+
+#### 1. Prepare Scripts
+
+##### Set Permissions
 
 Run this once to make all scripts executable:
 
@@ -20,7 +39,7 @@ Run this once to make all scripts executable:
 chmod +x auth.sh cleanup.sh config.sh setup.sh start.sh stop.sh
 ```
 
-#### [Optional] Override Default Credentials
+##### [Optional] Override Default Credentials
 
 You can create a `.env` file in the project root to override `CRD_USER`, and `CRD_PASSWORD`. If omitted, the defaults in `config.sh` are used.
 
@@ -28,7 +47,7 @@ You can create a `.env` file in the project root to override `CRD_USER`, and `CR
 cp sample_env .env
 ```
 
-#### [Optional] Add Custom Setup Instructions
+##### [Optional] Add Custom Setup Instructions
 
 You may add any custom setup instructions e.g. software installs, etc. to `scripts/custom-setup.sh`.
 
@@ -38,7 +57,7 @@ Duplicate and edit the sample script before moving to step 2:
 cp scripts/custom-setup-sample.sh scripts/custom-setup.sh
 ```
 
-### 2. Set Up Machine
+#### 2. Set Up Machine
 
 Run the setup script. This will build the image and initiate the Chrome Remote Desktop auth flow.
 
