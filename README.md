@@ -20,8 +20,8 @@ chmod +x *.sh && ./setup.sh
 
 **Good to know:**
 
-    - The default VM username and password are `crduser` and `crdpassword`.
-    - If you've previously set up a machine (from the same folder), this will preserve VM data (in the Desktop, Downloads and Documents folders), and not require re-authentication with Chrome Remote Desktop.
+- The default VM username and password are `crduser` and `crdpassword`.
+- If you've previously set up a machine (from the same folder), this will preserve VM data (in the Desktop, Downloads and Documents folders), and not require re-authentication with Chrome Remote Desktop.
 
 Skip to [Daily Usage](#daily-usage).
 
