@@ -1,5 +1,3 @@
-# Box
-
 Full-featured Linux VM with a graphical interface and persistent storage, using Docker and Chrome Remote Desktop.
 
 ## Requirements
